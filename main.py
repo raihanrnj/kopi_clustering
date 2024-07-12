@@ -230,7 +230,7 @@ def gmm_clustering(df, X):
     
 # Fungsi untuk memuat data
 def load_data(file):
-    df = pd.read_csv(file, sep=";")
+    df = pd.read_csv(file)
     return df
 
 # Fungsi utama untuk menjalankan aplikasi Streamlit
