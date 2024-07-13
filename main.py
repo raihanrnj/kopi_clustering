@@ -248,8 +248,7 @@ def main():
     if choice == "Overview":
         st.subheader("Overview")
         st.write("""
-        Analisis clustering adalah teknik yang digunakan untuk mengelompokkan data ke dalam cluster yang memiliki kesamaan. 
-        Dalam aplikasi ini, kami akan menggunakan berbagai metode clustering untuk menganalisis data Kabupaten/Kota.
+        Aplikasi ini digunakan untuk analisis klasterisasi produksi kopi tingkat Kabupaten/Kota di Indonesia.
         """)
 
     elif choice == "Upload Data Training":
