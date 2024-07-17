@@ -230,7 +230,7 @@ def gmm_clustering(df, X):
     
 # Fungsi untuk memuat data
 def load_data(file):
-    df = pd.read_csv(file)
+    df = pd.read_csv(file, sep=",")
     return df
 
 # Fungsi utama untuk menjalankan aplikasi Streamlit
@@ -248,7 +248,8 @@ def main():
     if choice == "Overview":
         st.subheader("Overview")
         st.write("""
-        Aplikasi ini digunakan untuk analisis klasterisasi produksi kopi tingkat Kabupaten/Kota di Indonesia.
+        Analisis clustering adalah teknik yang digunakan untuk mengelompokkan data ke dalam cluster yang memiliki kesamaan. 
+        Dalam aplikasi ini, kami akan menggunakan berbagai metode clustering untuk menganalisis data Kabupaten/Kota.
         """)
 
     elif choice == "Upload Data Training":
@@ -277,16 +278,89 @@ def main():
         X = df[['TON_SUM', 'L_MEAN']]
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
+        
 
-        st.write("Pilih metode clustering:")
-        if st.checkbox("KMeans Clustering"):
-            kmeans_clustering(df, X_scaled)
-        if st.checkbox("Agglomerative Clustering"):
-            agglomerative_clustering(df, X_scaled)
-        if st.checkbox("DBSCAN Clustering"):
-            dbscan_clustering(df, X_scaled)
-        if st.checkbox("Gaussian Mixture Model Clustering"):
-            gmm_clustering(df, X_scaled)
+        best_algo = ""
+        best_score = -1
+
+        st.write("Menjalankan semua metode clustering...")
+
+        # KMeans Clustering
+        min_clusters = 2
+        max_clusters = 11
+        best_silhouette_score = 0
+        best_clusters = None
+        for n_clusters in range(min_clusters, max_clusters):
+            clusterer = KMeans(n_clusters=n_clusters)
+            preds = clusterer.fit_predict(X_scaled)
+            silhouette_avg = silhouette_score(X_scaled, preds)
+            if silhouette_avg > best_silhouette_score:
+                best_silhouette_score = silhouette_avg
+                best_clusters = n_clusters
+        kmeans = KMeans(n_clusters=best_clusters, random_state=42)
+        df['Cluster'] = kmeans.fit_predict(X_scaled)
+        kmeans_silhouette = silhouette_score(X_scaled, df['Cluster'])
+        if kmeans_silhouette > best_score:
+            best_score = kmeans_silhouette
+            best_algo = "KMeans"
+
+        # Agglomerative Clustering
+        best_silhouette_score = 0
+        for n_clusters in range(2, 11):
+            agg_clustering = AgglomerativeClustering(n_clusters=n_clusters)
+            df['Cluster'] = agg_clustering.fit_predict(X_scaled)
+            silhouette_avg = silhouette_score(X_scaled, df['Cluster'])
+            if silhouette_avg > best_silhouette_score:
+                best_silhouette_score = silhouette_avg
+        agg_clustering = AgglomerativeClustering(n_clusters=n_clusters)
+        df['Cluster'] = agg_clustering.fit_predict(X_scaled)
+        agg_silhouette = silhouette_score(X_scaled, df['Cluster'])
+        if agg_silhouette > best_score:
+            best_score = agg_silhouette
+            best_algo = "Agglomerative Clustering"
+
+        # DBSCAN Clustering
+        dbscan = DBSCAN(eps=0.5, min_samples=5)
+        df['Cluster'] = dbscan.fit_predict(X_scaled)
+        if len(set(df['Cluster'])) > 1:
+            dbscan_silhouette = silhouette_score(X_scaled, df['Cluster'])
+            if dbscan_silhouette > best_score:
+                best_score = dbscan_silhouette
+                best_algo = "DBSCAN"
+        else:
+            dbscan_silhouette = -1
+
+        # Gaussian Mixture Model Clustering
+        bic_scores = []
+        min_clusters = 2
+        max_clusters = 10
+        best_silhouette_score = 0
+        for n_clusters in range(min_clusters, max_clusters + 1):
+            gmm = GaussianMixture(n_components=n_clusters, random_state=42)
+            gmm.fit(X_scaled)
+            labels = gmm.predict(X_scaled)
+            silhouette_avg = silhouette_score(X_scaled, labels)
+            if silhouette_avg > best_silhouette_score:
+                best_silhouette_score = silhouette_avg
+        gmm = GaussianMixture(n_components=n_clusters, random_state=42)
+        df['Cluster'] = gmm.fit_predict(X_scaled)
+        gmm_silhouette = silhouette_score(X_scaled, df['Cluster'])
+        if gmm_silhouette > best_score:
+            best_score = gmm_silhouette
+            best_algo = "Gaussian Mixture Model"
+
+        # Menampilkan algoritma terbaik
+        st.write(f"Algoritma terbaik adalah {best_algo} dengan Silhouette Score: {best_score}")
+
+        # st.write("Pilih metode clustering:")
+        # if st.checkbox("KMeans Clustering"):
+        kmeans_clustering(df, X_scaled)
+        # if st.checkbox("Agglomerative Clustering"):
+        agglomerative_clustering(df, X_scaled)
+        # if st.checkbox("DBSCAN Clustering"):
+        dbscan_clustering(df, X_scaled)
+        # if st.checkbox("Gaussian Mixture Model Clustering"):
+        gmm_clustering(df, X_scaled)
     elif choice == "Upload & Predict":
         st.subheader("Upload & Predict using KMEANS with 3 Cluster")
         uploaded_file = st.file_uploader("Unggah file CSV untuk prediksi", type=["csv"])
