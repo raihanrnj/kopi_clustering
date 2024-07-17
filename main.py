@@ -350,7 +350,7 @@ def main():
             best_algo = "Gaussian Mixture Model"
 
         # Menampilkan algoritma terbaik
-        st.write(f"Algoritma terbaik adalah {best_algo} dengan Silhouette Score: {best_score}")
+        st.write(f"Algoritma terbaik adalah {best_algo} dengan kluster = 2 dan Silhouette Score: {best_score}")
 
         # st.write("Pilih metode clustering:")
         # if st.checkbox("KMeans Clustering"):
