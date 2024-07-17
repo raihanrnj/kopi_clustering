@@ -384,6 +384,15 @@ def main():
             st.write(df_test)
             
             plot_clustering(X_test_scaled, df_test['Cluster'], 'KMeans Clustering for Testing Data')
+            
+            # Button to export CSV
+            csv = df_test.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="Download hasil prediksi sebagai CSV",
+                data=csv,
+                file_name='hasil_prediksi.csv',
+                mime='text/csv',
+            )
 
     
 
