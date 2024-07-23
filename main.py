@@ -303,6 +303,7 @@ def main():
     st.title("Analisis Klusterisasi Kopi di Kabupaten/Kota")
     st.set_option('deprecation.showPyplotGlobalUse', False)
 
+    st.sidebar.title("CoffeeZones")
     st.sidebar.title("Menu")
     menu = ["Overview", "Upload Data Training", "Data Preprocessing", "Modelling & Evaluation", "Upload & Predict"]
     choice = st.sidebar.selectbox("Pilih Menu", menu)
