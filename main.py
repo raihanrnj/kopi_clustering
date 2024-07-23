@@ -9,6 +9,7 @@ from sklearn.cluster import KMeans, AgglomerativeClustering, DBSCAN
 from sklearn.mixture import GaussianMixture
 from PIL import Image
 import pickle
+from sklearn_extra.cluster import KMedoids
 
 # Fungsi untuk memuat data
 def load_data(file):
@@ -40,13 +41,17 @@ def preprocess_data(df):
 #     plt.ylabel('Feature 2')
 #     st.pyplot()
 # Fungsi untuk menampilkan clustering hasil
-def plot_clustering(X, labels, title):
+# Fungsi untuk menampilkan clustering hasil
+def plot_clustering(X, labels, title, centroids=None):
     plt.figure(figsize=(10, 7))
     plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis')
+    if centroids is not None:
+        plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X')  # Plot centroid dengan warna merah dan marker X
     plt.title(title)
     plt.xlabel('TON_SUM')
     plt.ylabel('L_MEAN')
     st.pyplot()
+
 
 # Fungsi untuk KMeans clustering
 def kmeans_clustering(df, X):
@@ -87,8 +92,9 @@ def kmeans_clustering(df, X):
 
     kmeans = KMeans(n_clusters=best_clusters, random_state=42)
     df['Cluster'] = kmeans.fit_predict(X)
-    
-    plot_clustering(X, df['Cluster'], 'KMeans Clustering')
+    centroids = kmeans.cluster_centers_
+
+    plot_clustering(X, df['Cluster'], 'KMeans Clustering', centroids)
 
     # Display cluster counts
     cluster_counts = df['Cluster'].value_counts().sort_index()
@@ -210,8 +216,9 @@ def gmm_clustering(df, X):
 
     gmm = GaussianMixture(n_components=optimal_clusters, random_state=42)
     df['Cluster'] = gmm.fit_predict(X)
+    centroids = gmm.means_
 
-    plot_clustering(X, df['Cluster'], 'Gaussian Mixture Model Clustering')
+    plot_clustering(X, df['Cluster'], 'Gaussian Mixture Model Clustering', centroids)
 
     # Display cluster counts
     cluster_counts = df['Cluster'].value_counts().sort_index()
@@ -220,6 +227,50 @@ def gmm_clustering(df, X):
 
     # Display clusters
     for cluster in range(optimal_clusters):
+        cluster_data = df[df['Cluster'] == cluster]
+        st.write(f"\nCluster {cluster}:")
+        st.write(cluster_data[['Kabupaten/Kota']])
+
+    # Display silhouette score
+    silhouette_avg = silhouette_score(X, df['Cluster'])
+    st.write(f"\nSilhouette Score: {silhouette_avg}")
+    
+# Fungsi untuk KMedoids clustering
+def kmedoids_clustering(df, X):
+    st.write("## KMedoids Clustering")
+    min_clusters = 2
+    max_clusters = 10
+    best_silhouette_score = 0
+    best_clusters = None
+
+    for n_clusters in range(min_clusters, max_clusters + 1):
+        kmedoids = KMedoids(n_clusters=n_clusters, random_state=42)
+        preds = kmedoids.fit_predict(X)
+        
+        silhouette_avg = silhouette_score(X, preds)
+        dbi_score = davies_bouldin_score(X, preds)
+        
+        if silhouette_avg > best_silhouette_score:
+            best_silhouette_score = silhouette_avg
+            best_clusters = n_clusters
+            
+        st.write(f"Jumlah Cluster = {n_clusters}, Silhouette Score = {silhouette_avg}, Davies-Bouldin Index = {dbi_score}")
+    
+    st.write(f"Cluster terbaik berdasarkan Silhouette Score: {best_clusters} dengan nilai Silhouette Score: {best_silhouette_score}")
+
+    kmedoids = KMedoids(n_clusters=best_clusters, random_state=42)
+    df['Cluster'] = kmedoids.fit_predict(X)
+    centroids = kmedoids.cluster_centers_
+    
+    plot_clustering(X, df['Cluster'], 'KMedoids Clustering', centroids)
+
+    # Display cluster counts
+    cluster_counts = df['Cluster'].value_counts().sort_index()
+    st.write("Jumlah data dalam masing-masing cluster:")
+    st.write(cluster_counts)
+
+    # Display clusters
+    for cluster in range(best_clusters):
         cluster_data = df[df['Cluster'] == cluster]
         st.write(f"\nCluster {cluster}:")
         st.write(cluster_data[['Kabupaten/Kota']])
@@ -348,19 +399,56 @@ def main():
         if gmm_silhouette > best_score:
             best_score = gmm_silhouette
             best_algo = "Gaussian Mixture Model"
+            
+        # KMedoids Clustering
+        best_silhouette_score = 0
+        for n_clusters in range(min_clusters, max_clusters):
+            kmedoids = KMedoids(n_clusters=n_clusters, random_state=42)
+            preds = kmedoids.fit_predict(X_scaled)
+            silhouette_avg = silhouette_score(X_scaled, preds)
+            if silhouette_avg > best_silhouette_score:
+                best_silhouette_score = silhouette_avg
+                best_clusters = n_clusters
+        kmedoids = KMedoids(n_clusters=best_clusters, random_state=42)
+        df['Cluster'] = kmedoids.fit_predict(X_scaled)
+        kmedoids_silhouette = silhouette_score(X_scaled, df['Cluster'])
+        if kmedoids_silhouette > best_score:
+            best_score = kmedoids_silhouette
+            best_algo = "KMedoids"
 
+        # Teks yang ingin diubah
+        text = f"Algoritma terbaik adalah {best_algo} dengan kluster = 2 dan Silhouette Score: {best_score}"
+
+        # Definisi CSS untuk teks dengan border biru
+        css = """
+        <style>
+        .highlight-box {
+            display: inline-block;
+            padding: 10px;
+            border: 2px solid blue; /* Warna border */
+            border-radius: 5px; /* Radius border */
+            background-color: #e0f7fa; /* Warna background (biru muda) */
+            color: black; /* Warna teks */
+            font-size: 18px; /* Ukuran font */
+        }
+        </style>
+        """
+
+        # Tampilkan CSS dan teks dengan bounding box di Streamlit
+        st.markdown(css, unsafe_allow_html=True)
+        st.markdown(f'<div class="highlight-box">{text}</div>', unsafe_allow_html=True)
+        
         # Menampilkan algoritma terbaik
-        st.write(f"Algoritma terbaik adalah {best_algo} dengan kluster = 2 dan Silhouette Score: {best_score}")
+        # st.write(f"Algoritma terbaik adalah {best_algo} dengan kluster = 2 dan Silhouette Score: {best_score}")
 
-        # st.write("Pilih metode clustering:")
-        # if st.checkbox("KMeans Clustering"):
+
         kmeans_clustering(df, X_scaled)
-        # if st.checkbox("Agglomerative Clustering"):
         agglomerative_clustering(df, X_scaled)
-        # if st.checkbox("DBSCAN Clustering"):
         dbscan_clustering(df, X_scaled)
-        # if st.checkbox("Gaussian Mixture Model Clustering"):
         gmm_clustering(df, X_scaled)
+        kmedoids_clustering(df, X)
+        
+        
     elif choice == "Upload & Predict":
         st.subheader("Upload & Predict using KMEANS with 3 Cluster")
         uploaded_file = st.file_uploader("Unggah file CSV untuk prediksi", type=["csv"])
@@ -398,6 +486,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
