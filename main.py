@@ -261,8 +261,12 @@ def kmedoids_clustering(df, X):
     kmedoids = KMedoids(n_clusters=best_clusters, random_state=42)
     df['Cluster'] = kmedoids.fit_predict(X)
     centroids = kmedoids.cluster_centers_
-    
-    plot_clustering(X, df['Cluster'], 'KMedoids Clustering', centroids)
+
+    # Ensure centroids is a valid NumPy array
+    if isinstance(centroids, np.ndarray) and centroids.ndim == 2:
+        plot_clustering(X, df['Cluster'], 'KMedoids Clustering', centroids)
+    else:
+        st.write("Error: Centroids array is not valid or not in the correct format.")
 
     # Display cluster counts
     cluster_counts = df['Cluster'].value_counts().sort_index()
