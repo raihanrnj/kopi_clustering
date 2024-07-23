@@ -44,12 +44,18 @@ def preprocess_data(df):
 # Fungsi untuk menampilkan clustering hasil
 def plot_clustering(X, labels, title, centroids=None):
     plt.figure(figsize=(10, 7))
+    # Jika X adalah DataFrame, ubah menjadi numpy array
+    if isinstance(X, pd.DataFrame):
+        X = X.to_numpy()
     plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis')
     if centroids is not None:
-        plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X')  # Plot centroid dengan warna merah dan marker X
+        # Jika centroids adalah DataFrame, ubah menjadi numpy array
+        if isinstance(centroids, pd.DataFrame):
+            centroids = centroids.to_numpy()
+        plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X')
     plt.title(title)
-    plt.xlabel('TON_SUM')
-    plt.ylabel('L_MEAN')
+    plt.xlabel('Feature 1')
+    plt.ylabel('Feature 2')
     st.pyplot()
 
 
