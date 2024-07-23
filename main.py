@@ -299,6 +299,7 @@ def main():
     # Tambahkan ikon dan judul utama
     coffee_icon = Image.open('kopi.png')  # Pastikan kamu memiliki file coffee_icon.png
     st.image(coffee_icon, width=60)
+    st.title('CoffeeZones')  # Menambahkan judul di Streamlit
     st.title("Analisis Klusterisasi Kopi di Kabupaten/Kota")
     st.set_option('deprecation.showPyplotGlobalUse', False)
 
