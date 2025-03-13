@@ -1,3 +1,5 @@
+tolong code ini diubah grafik2 plotnya saja, yaitu warnanya atau penamaan plotnya saja biar ngg aplagiat, tapi code selain itu jangan di ubah ya please:
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -336,8 +338,8 @@ def main():
         st.subheader("Modelling & Evaluation")
         df = load_data('preprocessed_data.csv')
         # X = df[['TON_MEAN', 'TON_SUM', 'L_MEAN', 'L_SUM']]
-        # The line `X = df[['TON_MEAN', 'TON_SUM', 'L_MEAN', 'L_SUM']]` is selecting specific columns
-        # from the DataFrame `df` and assigning them to a new DataFrame `X`.
+        # The line X = df[['TON_MEAN', 'TON_SUM', 'L_MEAN', 'L_SUM']] is selecting specific columns
+        # from the DataFrame df and assigning them to a new DataFrame X.
         X = df[['TON_SUM', 'L_MEAN']]
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
