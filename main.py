@@ -289,7 +289,7 @@ def load_data(file):
 # Fungsi utama untuk menjalankan aplikasi Streamlit
 def main():
     # Tambahkan ikon dan judul utama
-    coffee_icon = Image.open('kopi.jpg')  # Pastikan kamu memiliki file kopi.png
+    coffee_icon = Image.open('coffe2.png')  # Pastikan kamu memiliki file kopi.png
     st.image(coffee_icon, width=60)
     st.title('CoffeTimes')  # Menambahkan judul di Streamlit
     st.title("Analisis Klusterisasi Kopi di Kabupaten/Kota")
