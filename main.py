@@ -289,13 +289,13 @@ def load_data(file):
 # Fungsi utama untuk menjalankan aplikasi Streamlit
 def main():
     # Tambahkan ikon dan judul utama
-    coffee_icon = Image.open('kopi.png')  # Pastikan kamu memiliki file kopi.png
+    coffee_icon = Image.open('kopi.jpg')  # Pastikan kamu memiliki file kopi.png
     st.image(coffee_icon, width=60)
-    st.title('CoffeeZones')  # Menambahkan judul di Streamlit
+    st.title('CoffeTimes')  # Menambahkan judul di Streamlit
     st.title("Analisis Klusterisasi Kopi di Kabupaten/Kota")
     st.set_option('deprecation.showPyplotGlobalUse', False)
 
-    st.sidebar.title("CoffeeZones")
+    st.sidebar.title("CoffeTimes")
     st.sidebar.title("Menu")
     menu = ["Overview", "Upload Data Training", "Data Preprocessing", "Modelling & Evaluation", "Upload & Predict"]
     choice = st.sidebar.selectbox("Pilih Menu", menu)
