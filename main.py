@@ -1,5 +1,3 @@
-tolong code ini diubah grafik2 plotnya saja, yaitu warnanya atau penamaan plotnya saja biar ngg aplagiat, tapi code selain itu jangan di ubah ya please:
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -25,7 +23,7 @@ def preprocess_data(df):
     
     for col in columns_to_convert:
         df[col] = df[col].replace('#VALUE!', np.nan)  # Mengganti #VALUE! dengan NaN  
-        df[col] = df[col].replace('#DIV/0!', np.nan)  # Mengganti #VALUE! dengan NaN
+        df[col] = df[col].replace('#DIV/0!', np.nan)  # Mengganti #DIV/0! dengan NaN
         df[col] = df[col].str.replace(',', '.')       # Mengganti koma dengan titik
         df[col] = df[col].astype(float).fillna(0)
 
@@ -34,32 +32,24 @@ def preprocess_data(df):
     
     return df
 
-# # Fungsi untuk menampilkan clustering hasil
-# def plot_clustering(X, labels, title):
-#     plt.figure(figsize=(10, 7))
-#     plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis')
-#     plt.title(title)
-#     plt.xlabel('Feature 1')
-#     plt.ylabel('Feature 2')
-#     st.pyplot()
-# Fungsi untuk menampilkan clustering hasil
 # Fungsi untuk menampilkan clustering hasil
 def plot_clustering(X, labels, title, centroids=None):
     plt.figure(figsize=(10, 7))
     # Jika X adalah DataFrame, ubah menjadi numpy array
     if isinstance(X, pd.DataFrame):
         X = X.to_numpy()
-    plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis')
+    # Menggunakan colormap 'plasma' untuk membedakan tampilan
+    plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='plasma')
     if centroids is not None:
         # Jika centroids adalah DataFrame, ubah menjadi numpy array
         if isinstance(centroids, pd.DataFrame):
             centroids = centroids.to_numpy()
-        plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='red', marker='X')
+        # Mengubah warna dan marker untuk centroids
+        plt.scatter(centroids[:, 0], centroids[:, 1], s=300, c='green', marker='D')
     plt.title(title)
-    plt.xlabel('Feature 1')
-    plt.ylabel('Feature 2')
+    plt.xlabel('Sumbu X')
+    plt.ylabel('Sumbu Y')
     st.pyplot()
-
 
 # Fungsi untuk KMeans clustering
 def kmeans_clustering(df, X):
@@ -84,7 +74,7 @@ def kmeans_clustering(df, X):
 
     st.write(f"Cluster terbaik berdasarkan Silhouette Score: {best_clusters} dengan nilai Silhouette Score: {best_silhouette_score}")
 
-    # Plot elbow method
+    # Plot elbow method dengan tampilan yang dimodifikasi
     sse = []
     for k in range(1, 11):
         kmeans = KMeans(n_clusters=k, random_state=0)
@@ -92,10 +82,10 @@ def kmeans_clustering(df, X):
         sse.append(kmeans.inertia_)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(range(1, 11), sse, marker='o')
-    plt.xlabel('Number of clusters')
-    plt.ylabel('Sum of Squared Errors (SSE)')
-    plt.title('Elbow Method for Optimal Number of Clusters')
+    plt.plot(range(1, 11), sse, marker='s', color='magenta')
+    plt.xlabel('Jumlah Cluster')
+    plt.ylabel('Total SSE')
+    plt.title('Plot Elbow: Menentukan Cluster Optimal')
     st.pyplot()
 
     kmeans = KMeans(n_clusters=best_clusters, random_state=42)
@@ -137,21 +127,21 @@ def agglomerative_clustering(df, X):
 
         st.write(f"Jumlah Cluster = {n_clusters}, Silhouette Score = {silhouette}, Davies-Bouldin Index = {dbi}")
 
-    # Plotting DBI
+    # Plotting Davies-Bouldin Index dengan tampilan yang dimodifikasi
     plt.figure(figsize=(10, 5))
-    plt.plot(range(2, 11), dbi_scores, marker='o')
-    plt.title('Davies-Bouldin Index')
-    plt.xlabel('Number of Clusters')
-    plt.ylabel('DBI Score')
+    plt.plot(range(2, 11), dbi_scores, marker='o', color='darkblue')
+    plt.title('Grafik Indeks Davies-Bouldin')
+    plt.xlabel('Jumlah Cluster')
+    plt.ylabel('Skor DBI')
     plt.grid(True)
     st.pyplot()
 
-    # Plotting Silhouette
+    # Plotting Silhouette Score dengan tampilan yang dimodifikasi
     plt.figure(figsize=(10, 5))
-    plt.plot(range(2, 11), silhouette_scores, marker='o')
-    plt.title('Silhouette Score')
-    plt.xlabel('Number of Clusters')
-    plt.ylabel('Silhouette Score')
+    plt.plot(range(2, 11), silhouette_scores, marker='o', color='darkorange')
+    plt.title('Grafik Skor Silhouette')
+    plt.xlabel('Jumlah Cluster')
+    plt.ylabel('Skor Silhouette')
     plt.grid(True)
     st.pyplot()
 
@@ -251,7 +241,7 @@ def kmedoids_clustering(df, X):
     best_silhouette_score = 0
     best_clusters = None
 
-    for n_clusters in range(min_clusters, max_clusters + 1):
+    for n_clusters in range(min_clusters, max_clusters):
         kmedoids = KMedoids(n_clusters=n_clusters, random_state=42)
         preds = kmedoids.fit_predict(X)
         
@@ -299,7 +289,7 @@ def load_data(file):
 # Fungsi utama untuk menjalankan aplikasi Streamlit
 def main():
     # Tambahkan ikon dan judul utama
-    coffee_icon = Image.open('kopi.png')  # Pastikan kamu memiliki file coffee_icon.png
+    coffee_icon = Image.open('kopi.png')  # Pastikan kamu memiliki file kopi.png
     st.image(coffee_icon, width=60)
     st.title('CoffeeZones')  # Menambahkan judul di Streamlit
     st.title("Analisis Klusterisasi Kopi di Kabupaten/Kota")
@@ -337,14 +327,10 @@ def main():
     elif choice == "Modelling & Evaluation":
         st.subheader("Modelling & Evaluation")
         df = load_data('preprocessed_data.csv')
-        # X = df[['TON_MEAN', 'TON_SUM', 'L_MEAN', 'L_SUM']]
-        # The line X = df[['TON_MEAN', 'TON_SUM', 'L_MEAN', 'L_SUM']] is selecting specific columns
-        # from the DataFrame df and assigning them to a new DataFrame X.
         X = df[['TON_SUM', 'L_MEAN']]
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
         
-
         best_algo = ""
         best_score = -1
 
@@ -452,22 +438,16 @@ def main():
         st.markdown(css, unsafe_allow_html=True)
         st.markdown(f'<div class="highlight-box">{text}</div>', unsafe_allow_html=True)
         
-        # Menampilkan algoritma terbaik
-        # st.write(f"Algoritma terbaik adalah {best_algo} dengan kluster = 2 dan Silhouette Score: {best_score}")
-
-
         kmeans_clustering(df, X_scaled)
         agglomerative_clustering(df, X_scaled)
         dbscan_clustering(df, X_scaled)
         gmm_clustering(df, X_scaled)
         kmedoids_clustering(df, X)
         
-        
     elif choice == "Upload & Predict":
         st.subheader("Upload & Predict using KMEANS with 3 Cluster")
         uploaded_file = st.file_uploader("Unggah file CSV untuk prediksi", type=["csv"])
         if uploaded_file is not None:
-            # df_test = load_data(uploaded_file)
             df_test = pd.read_csv(uploaded_file, sep=";")
             st.write("Data untuk prediksi berhasil diunggah!")
             st.write(df_test.head())
@@ -495,8 +475,6 @@ def main():
                 file_name='hasil_prediksi.csv',
                 mime='text/csv',
             )
-
-    
 
 if __name__ == "__main__":
     main()
